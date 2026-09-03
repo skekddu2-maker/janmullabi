@@ -142,7 +142,7 @@
         });
 
         async function handleSendMessage() {
-            const apiKey = localStorage.getItem('GEMINI_API_KEY') || apiKeyInput.value.trim();
+            const apiKey = localStorage.getItem('GEMINI_API_KEY'] || apiKeyInput.value.trim();
             if (!apiKey) {
                 alert('먼저 상단에 Gemini API 키를 입력하고 [저장]을 눌러주세요!');
                 return;
@@ -196,9 +196,9 @@
                 const promptText = (text || "이 아이템을 분석해주세요.") + "\n\n당신은 세계적인 빈티지 의류, 밀리터리 및 소품 전문가입니다. 라벨, 지퍼/하드웨어, 원단감 등을 바탕으로 예상 연식, 브랜드, 상세 디테일 근거를 완벽하게 분석해주세요.";
                 contents.push(promptText);
 
-                // 트래픽 분산이 잘 되는 안정적인 gemini-2.5-flash 모델 사용
+                // 가장 안정적인 gemini-2.0-flash 모델 적용
                 const response = await ai.models.generateContent({
-                    model: 'gemini-2.5-flash',
+                    model: 'gemini-2.0-flash',
                     contents: contents,
                 });
 
