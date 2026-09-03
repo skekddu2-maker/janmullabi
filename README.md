@@ -12,5 +12,3 @@
 
 1. 저장소를 클릭하거나 코드를 다운로드합니다.
 2. 필요한 라이브러리를 설치합니다.
-   ```bash
-   pip install -r requirements.txt
