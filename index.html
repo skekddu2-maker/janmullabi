@@ -171,8 +171,8 @@
             chatContainer.scrollTop = chatContainer.scrollHeight;
 
             try {
-                // 정확히 검증된 gemini-2.5-flash 모델 및 v1beta 엔드포인트 사용
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+                // 권장 모델인 gemini-3.6-flash 적용
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`;
 
                 let parts = [];
                 if (currentImage) {
