@@ -3,213 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>솔이의 빈티지 연식 판별 챗봇</title>
+    <title>빈티지 연식 판별 챗봇</title>
     <style>
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            background-color: #121212;
-            color: #f3f4f6;
-            font-family: 'Malgun Gothic', sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-        .container {
-            width: 100%;
-            max-width: 500px;
-            display: flex;
-            flex-direction: column;
-            height: 90vh;
-        }
-        h1 {
-            font-size: 1.2rem;
-            margin-bottom: 10px;
-            color: #f3f4f6;
-            text-align: center;
-        }
-        .chat-box {
-            flex: 1;
-            background-color: #1e1e1e;
-            border: 1px solid #333;
-            border-radius: 8px;
-            padding: 15px;
-            overflow-y: auto;
-            margin-bottom: 15px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-        .message {
-            padding: 10px 14px;
-            border-radius: 8px;
-            max-width: 85%;
-            font-size: 0.9rem;
-            line-height: 1.4;
-            white-space: pre-wrap;
-        }
-        .message.user {
-            background-color: #059669;
-            color: white;
-            align-self: flex-end;
-        }
-        .message.bot {
-            background-color: #2d2d2d;
-            color: #f3f4f6;
-            align-self: flex-start;
-        }
-        .message img {
-            max-width: 100%;
-            border-radius: 6px;
-            margin-bottom: 8px;
-        }
-        .input-area {
-            background-color: #1e1e1e;
-            padding: 12px;
-            border-radius: 8px;
-            border: 1px solid #333;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .preview-thumb {
-            max-height: 60px;
-            border-radius: 4px;
-            display: none;
-            width: fit-content;
-        }
-        .input-row {
-            display: flex;
-            gap: 8px;
-        }
-        input[type="text"] {
-            flex: 1;
-            padding: 10px;
-            font-size: 0.95rem;
-            background-color: #2d2d2d;
-            border: 1px solid #444;
-            color: #f3f4f6;
-            border-radius: 6px;
-            outline: none;
-        }
-        .upload-btn, .send-btn {
-            background-color: #262626;
-            color: #f3f4f6;
-            border: 1px solid #444;
-            padding: 10px 14px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        .upload-btn:hover, .send-btn:hover { background-color: #383838; }
-        .send-btn { background-color: #059669; border: none; color: white; }
-        .send-btn:hover { background-color: #047857; }
-        input[type="file"] { display: none; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Apple SD Gothic Neo', sans-serif; }
+        body { background-color: #121212; color: #e0e0e0; display: flex; flex-direction: column; height: 100vh; justify-content: space-between; }
+        header { background-color: #1e1e1e; padding: 15px; text-align: center; font-size: 18px; font-weight: bold; border-bottom: 1px solid #333; color: #fff; }
+        #chat-container { flex: 1; overflow-y: auto; padding: 15px; display: flex; flex-direction: column; gap: 12px; }
+        .message { max-width: 80%; padding: 12px 16px; border-radius: 12px; line-height: 1.5; font-size: 14px; word-break: break-word; }
+        .user-message { background-color: #3b82f6; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
+        .ai-message { background-color: #2a2a2a; color: #e0e0e0; align-self: flex-start; border-bottom-left-radius: 2px; border: 1px solid #3d3d3d; }
+        .ai-message img { max-width: 100%; border-radius: 8px; margin-bottom: 8px; }
+        #input-container { background-color: #1e1e1e; padding: 10px 15px; display: flex; gap: 10px; align-items: center; border-top: 1px solid #333; }
+        #image-preview-container { position: relative; display: none; align-items: center; }
+        #image-preview { width: 45px; height: 45px; object-fit: cover; border-radius: 6px; border: 1px solid #555; }
+        #remove-image { position: absolute; top: -6px; right: -6px; background: #ff4d4d; color: white; border: none; border-radius: 50%; width: 18px; height: 18px; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        #user-input { flex: 1; background-color: #2a2a2a; border: 1px solid #444; border-radius: 20px; padding: 10px 15px; color: white; font-size: 14px; outline: none; }
+        #user-input:focus { border-color: #3b82f6; }
+        .upload-btn-label, #send-btn { background-color: #3b82f6; color: white; border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 18px; transition: background 0.2s; flex-shrink: 0; }
+        .upload-btn-label:hover, #send-btn:hover { background-color: #2563eb; }
+        #image-input { display: none; }
     </style>
 </head>
 <body>
 
-<div class="container">
-    <h1>🧥 솔이의 빈티지 연식 판별 챗봇</h1>
-    
-    <div class="chat-box" id="chatBox">
-        <div class="message bot">안녕하세요! 솔이의 빈티지 연식 판별 챗봇입니다. 🧐<br>궁금한 아이템의 라벨, 지퍼, 원단 사진을 올리거나 질문을 남겨주시면 연식을 판별해 드릴게요!</div>
+    <header>🏷️ 빈티지 연식 판별 챗봇</header>
+
+    <div id="chat-container">
+        <div class="message ai-message">안녕하세요! 분석하고 싶은 빈티지 의류나 소품의 **사진**을 올리시고 궁금한 점을 물어보세요. 라벨, 하드웨어, 원단 등을 분석해 연식을 판별해 드립니다!</div>
     </div>
 
-    <div class="input-area">
-        <img id="previewThumb" class="preview-thumb" src="" alt="미리보기">
-        <div class="input-row">
-            <label class="upload-btn" for="fileInput">📷</label>
-            <input type="file" id="fileInput" accept="image/*">
-            <input type="text" id="userInput" placeholder="궁금한 점을 물어보세요 (예: 이 라벨 연식 알려줘)" onkeydown="if(event.key==='Enter') sendMessage()">
-            <button class="send-btn" onclick="sendMessage()">전송</button>
+    <div id="input-container">
+        <label for="image-input" class="upload-btn-label" title="사진 업로드">📷</label>
+        <input type="file" id="image-input" accept="image/*">
+        
+        <div id="image-preview-container">
+            <img id="image-preview" src="" alt="미리보기">
+            <button id="remove-image">✕</button>
         </div>
+
+        <input type="text" id="user-input" placeholder="예: 이 자켓 연식과 디테일 분석해줘">
+        <button id="send-btn">➤</button>
     </div>
-</div>
 
-<script>
-    let selectedImageBase64 = null;
-    let selectedMimeType = null;
+    <script>
+        const chatContainer = document.getElementById('chat-container');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const imageInput = document.getElementById('image-input');
+        const imagePreviewContainer = document.getElementById('image-preview-container');
+        const imagePreview = document.getElementById('image-preview');
+        const removeImageBtn = document.getElementById('remove-image');
 
-    const fileInput = document.getElementById('fileInput');
-    const previewThumb = document.getElementById('previewThumb');
-    const chatBox = document.getElementById('chatBox');
-    const userInput = document.getElementById('userInput');
+        let selectedBase64Image = null;
+        let selectedMimeType = null;
 
-    fileInput.onchange = (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
-        selectedMimeType = file.type;
-        const reader = new FileReader();
-        reader.onload = (uploadEvent) => {
-            selectedImageBase64 = uploadEvent.target.result.split(',')[1];
-            previewThumb.src = uploadEvent.target.result;
-            previewThumb.style.display = 'block';
-        };
-        reader.readAsDataURL(file);
-    };
-
-    async function sendMessage() {
-        const text = userInput.value.trim();
-        if (!text && !selectedImageBase64) return;
-
-        // 유저 메시지 화면에 추가
-        const userMsgDiv = document.createElement('div');
-        userMsgDiv.className = 'message user';
-        if (selectedImageBase64) {
-            const imgTag = document.createElement('img');
-            imgTag.src = previewThumb.src;
-            userMsgDiv.appendChild(imgTag);
-        }
-        if (text) {
-            const textTag = document.createElement('div');
-            textTag.innerText = text;
-            userMsgDiv.appendChild(textTag);
-        }
-        chatBox.appendChild(userMsgDiv);
-        chatBox.scrollTop = chatBox.scrollHeight;
-
-        const currentImage = selectedImageBase64;
-        const currentMime = selectedMimeType;
-
-        // 입력창 초기화
-        userInput.value = '';
-        selectedImageBase64 = null;
-        selectedMimeType = null;
-        previewThumb.style.display = 'none';
-        previewThumb.src = '';
-
-        // 로딩 메시지 추가
-        const botMsgDiv = document.createElement('div');
-        botMsgDiv.className = 'message bot';
-        botMsgDiv.innerText = "분석 중입니다... 🧐";
-        chatBox.appendChild(botMsgDiv);
-        chatBox.scrollTop = chatBox.scrollHeight;
-
-        try {
-            const response = await fetch('/api/analyze', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    prompt: text || "이 빈티지 아이템의 예상 연식과 디테일을 분석해주세요.",
-                    image: currentImage,
-                    mimeType: currentMime
-                })
-            });
-
-            const data = await response.json();
-            if (data.error) {
-                botMsgDiv.innerText = "오류 발생: " + data.error;
-            } else {
-                botMsgDiv.innerText = data.result;
+        imageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                selectedMimeType = file.type;
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    selectedBase64Image = event.target.result.split(',')[1];
+                    imagePreview.src = event.target.result;
+                    imagePreviewContainer.style.display = 'flex';
+                };
+                reader.readAsDataURL(file);
             }
-        } catch (err) {
-            botMsgDiv.innerText = "통신 중 오류가 발생했습니다.";
-        }
-        chatBox.scrollTop = chatBox.scrollHeight;
-    }
-</script>
+        });
 
+        removeImageBtn.addEventListener('click', () => {
+            imageInput.value = '';
+            selectedBase64Image = null;
+            selectedMimeType = null;
+            imagePreviewContainer.style.display = 'none';
+        });
+
+        async function handleSendMessage() {
+            const text = userInput.value.trim();
+            if (!text && !selectedBase64Image) return;
+
+            // 사용자 메시지 화면 표시
+            let userHtml = '';
+            if (selectedBase64Image) {
+                userHtml += `<img src="data:${selectedMimeType};base64,${selectedBase64Image}" style="max-width:150px; border-radius:8px; display:block; margin-bottom:5px;">`;
+            }
+            if (text) {
+                userHtml += `<span>${text}</span>`;
+            }
+
+            const userMsgDiv = document.createElement('div');
+            userMsgDiv.className = 'message user-message';
+            userMsgDiv.innerHTML = userHtml;
+            chatContainer.appendChild(userMsgDiv);
+
+            const currentImage = selectedBase64Image;
+            const currentMime = selectedMimeType;
+
+            // 입력창 초기화
+            userInput.value = '';
+            imageInput.value = '';
+            selectedBase64Image = null;
+            selectedMimeType = null;
+            imagePreviewContainer.style.display = 'none';
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            // 로딩 메시지 표시
+            const aiMsgDiv = document.createElement('div');
+            aiMsgDiv.className = 'message ai-message';
+            aiMsgDiv.innerText = '빈티지 아이템을 정밀 분석 중입니다... 🕵️‍♂️';
+            chatContainer.appendChild(aiMsgDiv);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+
+            try {
+                const response = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        prompt: text || "이 빈티지 아이템을 분석해주세요.",
+                        image: currentImage,
+                        mimeType: currentMime
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(data.error || '서버 통신 중 오류가 발생했습니다.');
+                }
+
+                aiMsgDiv.innerText = data.result;
+            } catch (error) {
+                aiMsgDiv.innerText = '⚠️ 오류 발생: ' + error.message;
+            }
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        sendBtn.addEventListener('click', handleSendMessage);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleSendMessage();
+        });
+    </script>
 </body>
 </html>
