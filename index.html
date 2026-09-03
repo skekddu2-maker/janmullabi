@@ -82,15 +82,46 @@
         let selectedBase64Image = null;
         let selectedMimeType = null;
 
+        // 이미지 업로드 시 브라우저에서 가볍게 압축/리사이징 처리 (속도 개선)
         imageInput.addEventListener('change', (e) => {
             const file = e.target.files[0];
             if (file) {
-                selectedMimeType = file.type;
                 const reader = new FileReader();
                 reader.onload = (event) => {
-                    selectedBase64Image = event.target.result.split(',')[1];
-                    imagePreview.src = event.target.result;
-                    imagePreviewContainer.style.display = 'flex';
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 900;
+                        const MAX_HEIGHT = 900;
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > height) {
+                            if (width > MAX_WIDTH) {
+                                height *= MAX_WIDTH / width;
+                                width = MAX_WIDTH;
+                            }
+                        } else {
+                            if (height > MAX_HEIGHT) {
+                                width *= MAX_HEIGHT / height;
+                                height = MAX_HEIGHT;
+                            }
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        // JPEG 압축 (품질 0.8)
+                        const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                        selectedBase64Image = dataUrl.split(',')[1];
+                        selectedMimeType = 'image/jpeg';
+
+                        imagePreview.src = dataUrl;
+                        imagePreviewContainer.style.display = 'flex';
+                    };
+                    img.src = event.target.result;
                 };
                 reader.readAsDataURL(file);
             }
@@ -143,7 +174,6 @@
             chatContainer.scrollTop = chatContainer.scrollHeight;
 
             try {
-                // 서버에서 요구한 gemini-3.6-flash 모델 적용
                 const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`;
 
                 let parts = [];
