@@ -1,5 +1,5 @@
 [read me.md](https://github.com/user-attachments/files/31769858/read.me.md)
-# 🔍 검색쟁이 (Multi-Platform Searcher)
+# 🔍 솔이는 검색쟁이 (sol is Searcher)
 
 국내외 다양한 중고 거래 플랫폼(번개장터, 당근마켓, 후르츠패밀리, 메루카리, 이베이 등)과 검색엔진을 하나의 GUI에서 통합 검색할 수 있는 파이썬 데스크톱 프로그램입니다.
 
