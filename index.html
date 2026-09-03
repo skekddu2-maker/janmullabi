@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>검색쟁이 (Multi-Platform Searcher)</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background-color: #121212;
+            color: #f3f4f6;
+            font-family: 'Malgun Gothic', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            width: 100%;
+            max-width: 480px;
+        }
+        h1 {
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            color: #f3f4f6;
+        }
+        .search-box {
+            background-color: #1e1e1e;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border: 1px solid #333;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+            background-color: #2d2d2d;
+            border: 1px solid #444;
+            color: #f3f4f6;
+            border-radius: 6px;
+            outline: none;
+        }
+        input::placeholder { color: #6b7280; }
+        
+        .country-section {
+            background-color: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        .country-btn {
+            width: 100%;
+            background-color: #262626;
+            color: #f3f4f6;
+            padding: 12px;
+            text-align: left;
+            font-size: 1rem;
+            font-weight: bold;
+            border: none;
+            cursor: pointer;
+            outline: none;
+        }
+        .country-btn:hover { background-color: #383838; }
+        
+        .platforms {
+            padding: 10px 12px;
+            display: none;
+        }
+        .platforms.active { display: block; }
+        
+        .category-title {
+            font-size: 0.85rem;
+            color: #9ca3af;
+            margin: 8px 0 4px 0;
+            font-weight: bold;
+        }
+        .platform-btn {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin: 5px 0;
+            color: white;
+            font-weight: bold;
+            text-align: center;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+        .platform-btn:hover { opacity: 0.9; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🔍 검색쟁이 (Multi-Platform Searcher)</h1>
+    
+    <div class="search-box">
+        <label style="font-size: 0.9rem; font-weight: bold; display: block; margin-bottom: 6px;">통합 검색어 입력</label>
+        <input type="text" id="searchInput" placeholder="검색어를 입력하세요...">
+    </div>
+
+    <div id="menuContainer"></div>
+</div>
+
+<script>
+    const platformData = {
+        "🇰🇷 한국 (Korea)": {
+            "🔍 검색엔진": [
+                { name: "네이버 통합검색", url: q => `[https://search.naver.com/search.naver?query=$](https://search.naver.com/search.naver?query=$){encodeURIComponent(q)}`, color: "#059669" },
+                { name: "다음 통합검색", url: q => `[https://search.daum.net/search?w=tot&q=$](https://search.daum.net/search?w=tot&q=$){encodeURIComponent(q)}`, color: "#D97706" }
+            ],
+            "🛒 중고 플랫폼": [
+                { name: "번개장터", url: q => `[https://m.bunjang.co.kr/search/products?q=$](https://m.bunjang.co.kr/search/products?q=$){encodeURIComponent(q)}`, color: "#DC2626" },
+                { name: "당근마켓", url: q => `[https://www.daangn.com/search/$](https://www.daangn.com/search/$){encodeURIComponent(q)}`, color: "#FF6F0F" },
+                { name: "후르츠패밀리", url: q => `[https://fruitsfamily.com/search/$](https://fruitsfamily.com/search/$){encodeURIComponent(q)}?sort=RELEVANCE`, color: "#6366F1" }
+            ]
+        },
+        "🇯🇵 일본 (Japan)": {
+            "🔍 검색엔진": [
+                { name: "야후 재팬 (Yahoo!)", url: q => `[https://search.yahoo.co.jp/search?p=$](https://search.yahoo.co.jp/search?p=$){encodeURIComponent(q)}`, color: "#7C3AED" }
+            ],
+            "🛒 중고 플랫폼": [
+                { name: "메루카리 (Mercari)", url: q => `[https://jp.mercari.com/search?keyword=$](https://jp.mercari.com/search?keyword=$){encodeURIComponent(q)}`, color: "#E11D48" },
+                { name: "야후 옥션 (Yahoo Auction)", url: q => `[https://auctions.yahoo.co.jp/search/search?p=$](https://auctions.yahoo.co.jp/search/search?p=$){encodeURIComponent(q).replace(/%20/g, '+')}&s1=cb0`, color: "#EA580C" }
+            ]
+        },
+        "🇺🇸 미국 및 글로벌 (Global)": {
+            "🔍 검색엔진": [
+                { name: "구글 (Google)", url: q => `[https://www.google.com/search?q=$](https://www.google.com/search?q=$){encodeURIComponent(q)}`, color: "#2563EB" }
+            ],
+            "🛒 중고 & 빈티지 플랫폼": [
+                { name: "이베이 (eBay)", url: q => `[https://www.ebay.com/sch/i.html?_nkw=$](https://www.ebay.com/sch/i.html?_nkw=$){encodeURIComponent(q).replace(/%20/g, '+')}&_sop=15`, color: "#1D4ED8" },
+                { name: "페이스북 마켓플레이스", url: q => `[https://www.facebook.com/marketplace/search/?query=$](https://www.facebook.com/marketplace/search/?query=$){encodeURIComponent(q)}`, color: "#1E40AF" },
+                { name: "빈티드 (Vinted)", url: q => `[https://www.vinted.fr/catalog?search_text=$](https://www.vinted.fr/catalog?search_text=$){encodeURIComponent(q)}`, color: "#0D9488" },
+                { name: "포시마크 (Poshmark)", url: q => `[https://poshmark.com/search?query=$](https://poshmark.com/search?query=$){encodeURIComponent(q)}`, color: "#BE185D" },
+                { name: "그레일드 (Grailed)", url: q => `[https://www.grailed.com/shop?query=$](https://www.grailed.com/shop?query=$){encodeURIComponent(q)}`, color: "#4B5563" },
+                { name: "디팝 (Depop)", url: q => `[https://www.depop.com/search/?q=$](https://www.depop.com/search/?q=$){encodeURIComponent(q)}`, color: "#EF4444" },
+                { name: "베스티에르 콜렉티브", url: q => `[https://www.vestiairecollective.com/search/?q=$](https://www.vestiairecollective.com/search/?q=$){encodeURIComponent(q)}`, color: "#374151" }
+            ]
+        }
+    };
+
+    const container = document.getElementById('menuContainer');
+
+    for (const [country, categories] of Object.entries(platformData)) {
+        const section = document.createElement('div');
+        section.className = 'country-section';
+
+        const btn = document.createElement('button');
+        btn.className = 'country-btn';
+        btn.innerText = country;
+        
+        const content = document.createElement('div');
+        content.className = 'platforms';
+
+        btn.onclick = () => {
+            content.classList.toggle('active');
+        };
+
+        for (const [catName, items] of Object.entries(categories)) {
+            const catTitle = document.createElement('div');
+            catTitle.className = 'category-title';
+            catTitle.innerText = catName;
+            content.appendChild(catTitle);
+
+            items.forEach(item => {
+                const a = document.createElement('a');
+                a.className = 'platform-btn';
+                a.innerText = item.name;
+                a.style.backgroundColor = item.color;
+                a.href = "#";
+                a.onclick = (e) => {
+                    e.preventDefault();
+                    const keyword = document.getElementById('searchInput').value.trim();
+                    if (!keyword) {
+                        alert("검색어를 먼저 입력해주세요!");
+                        return;
+                    }
+                    window.open(item.url(keyword), '_blank');
+                };
+                content.appendChild(a);
+            });
+        }
+
+        section.appendChild(btn);
+        section.appendChild(content);
+        container.appendChild(section);
+    }
+</script>
+
+</body>
+</html>
