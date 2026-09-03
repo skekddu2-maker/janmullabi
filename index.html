@@ -134,7 +134,6 @@
             selectedBase64Image = null;
             selectedMimeType = null;
             imagePreviewContainer.style.display = 'none';
-            imagePreviewContainer.style.display = 'none';
             chatContainer.scrollTop = chatContainer.scrollHeight;
 
             const aiMsgDiv = document.createElement('div');
@@ -144,8 +143,8 @@
             chatContainer.scrollTop = chatContainer.scrollHeight;
 
             try {
-                // 최신 모델명(gemini-3.6-flash)으로 직접 통신
-                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.6-flash:generateContent?key=${apiKey}`;
+                // 가장 빠르고 안정적인 gemini-1.5-flash 모델 사용
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`;
 
                 let parts = [];
                 if (currentImage) {
