@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>솔이의 빈티지 연식 판별기 (Vintage Era Identifier)</title>
+    <title>솔이의 빈티지 연식 판별 챗봇</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -18,209 +18,196 @@
         }
         .container {
             width: 100%;
-            max-width: 480px;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            height: 90vh;
         }
         h1 {
             font-size: 1.2rem;
-            margin-bottom: 15px;
+            margin-bottom: 10px;
             color: #f3f4f6;
             text-align: center;
         }
-        .card {
+        .chat-box {
+            flex: 1;
             background-color: #1e1e1e;
-            padding: 15px;
-            border-radius: 8px;
-            margin-bottom: 15px;
             border: 1px solid #333;
+            border-radius: 8px;
+            padding: 15px;
+            overflow-y: auto;
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
         }
-        label {
+        .message {
+            padding: 10px 14px;
+            border-radius: 8px;
+            max-width: 85%;
             font-size: 0.9rem;
-            font-weight: bold;
-            display: block;
-            margin-bottom: 6px;
-            color: #d1d5db;
+            line-height: 1.4;
+            white-space: pre-wrap;
         }
-        input, textarea {
-            width: 100%;
+        .message.user {
+            background-color: #059669;
+            color: white;
+            align-self: flex-end;
+        }
+        .message.bot {
+            background-color: #2d2d2d;
+            color: #f3f4f6;
+            align-self: flex-start;
+        }
+        .message img {
+            max-width: 100%;
+            border-radius: 6px;
+            margin-bottom: 8px;
+        }
+        .input-area {
+            background-color: #1e1e1e;
             padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #333;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .preview-thumb {
+            max-height: 60px;
+            border-radius: 4px;
+            display: none;
+            width: fit-content;
+        }
+        .input-row {
+            display: flex;
+            gap: 8px;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 10px;
             font-size: 0.95rem;
             background-color: #2d2d2d;
             border: 1px solid #444;
             color: #f3f4f6;
             border-radius: 6px;
             outline: none;
-            margin-bottom: 10px;
         }
-        input::placeholder, textarea::placeholder { color: #6b7280; }
-        
-        .file-upload-label {
-            display: block;
-            width: 100%;
-            padding: 12px;
+        .upload-btn, .send-btn {
             background-color: #262626;
-            border: 1px dashed #555;
-            text-align: center;
+            color: #f3f4f6;
+            border: 1px solid #444;
+            padding: 10px 14px;
             border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
-            color: #9ca3af;
-            margin-bottom: 10px;
         }
-        .file-upload-label:hover { background-color: #333; color: #fff; }
+        .upload-btn:hover, .send-btn:hover { background-color: #383838; }
+        .send-btn { background-color: #059669; border: none; color: white; }
+        .send-btn:hover { background-color: #047857; }
         input[type="file"] { display: none; }
-
-        .preview-container {
-            width: 100%;
-            max-height: 250px;
-            overflow: hidden;
-            border-radius: 6px;
-            margin-bottom: 10px;
-            display: none;
-            text-align: center;
-            background: #000;
-        }
-        .preview-container img {
-            max-width: 100%;
-            max-height: 250px;
-            object-fit: contain;
-        }
-
-        .action-btn {
-            display: block;
-            width: 100%;
-            padding: 12px;
-            background-color: #059669;
-            color: white;
-            font-weight: bold;
-            text-align: center;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 1rem;
-        }
-        .action-btn:hover { background-color: #047857; }
-        .action-btn:disabled { background-color: #374151; color: #6b7280; cursor: not-allowed; }
-
-        .result-box {
-            background-color: #1e1e1e;
-            border: 1px solid #333;
-            border-radius: 8px;
-            padding: 15px;
-            margin-top: 15px;
-            white-space: pre-wrap;
-            font-size: 0.9rem;
-            line-height: 1.5;
-            display: none;
-        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>🧥 솔이의 빈티지 연식 판별기</h1>
+    <h1>🧥 솔이의 빈티지 연식 판별 챗봇</h1>
     
-    <div class="card">
-        <label>Gemini API 키 입력</label>
-        <input type="password" id="apiKeyInput" placeholder="AI Studio에서 발급받은 API 키를 입력하세요">
-        <p style="font-size: 0.75rem; color: #9ca3af; margin-top: -4px;">* 키는 브라우저에만 저장되며 외부로 유출되지 않습니다.</p>
+    <div class="chat-box" id="chatBox">
+        <div class="message bot">안녕하세요! 솔이의 빈티지 연식 판별 챗봇입니다. 🧐<br>궁금한 아이템의 라벨, 지퍼, 원단 사진을 올리거나 질문을 남겨주시면 연식을 판별해 드릴게요!</div>
     </div>
 
-    <div class="card">
-        <label>빈티지 아이템 사진 업로드</label>
-        <label class="file-upload-label" for="fileInput">📷 사진 선택하기 (라벨, 지퍼, 원단 등)</label>
-        <input type="file" id="fileInput" accept="image/*">
-        
-        <div class="preview-container" id="previewBox">
-            <img id="imagePreview" src="" alt="미리보기">
+    <div class="input-area">
+        <img id="previewThumb" class="preview-thumb" src="" alt="미리보기">
+        <div class="input-row">
+            <label class="upload-btn" for="fileInput">📷</label>
+            <input type="file" id="fileInput" accept="image/*">
+            <input type="text" id="userInput" placeholder="궁금한 점을 물어보세요 (예: 이 라벨 연식 알려줘)" onkeydown="if(event.key==='Enter') sendMessage()">
+            <button class="send-btn" onclick="sendMessage()">전송</button>
         </div>
-
-        <button class="action-btn" id="analyzeBtn" onclick="analyzeImage()" disabled>연식 및 디테일 분석 시작</button>
     </div>
-
-    <div class="result-box" id="resultBox"></div>
 </div>
 
 <script>
-    let base64Image = null;
-    let mimeType = null;
+    let selectedImageBase64 = null;
+    let selectedMimeType = null;
 
     const fileInput = document.getElementById('fileInput');
-    const previewBox = document.getElementById('previewBox');
-    const imagePreview = document.getElementById('imagePreview');
-    const analyzeBtn = document.getElementById('analyzeBtn');
+    const previewThumb = document.getElementById('previewThumb');
+    const chatBox = document.getElementById('chatBox');
+    const userInput = document.getElementById('userInput');
 
     fileInput.onchange = (e) => {
         const file = e.target.files[0];
         if (!file) return;
-
-        mimeType = file.type;
+        selectedMimeType = file.type;
         const reader = new FileReader();
         reader.onload = (uploadEvent) => {
-            base64Image = uploadEvent.target.result.split(',')[1];
-            imagePreview.src = uploadEvent.target.result;
-            previewBox.style.display = 'block';
-            checkReady();
+            selectedImageBase64 = uploadEvent.target.result.split(',')[1];
+            previewThumb.src = uploadEvent.target.result;
+            previewThumb.style.display = 'block';
         };
         reader.readAsDataURL(file);
     };
 
-    document.getElementById('apiKeyInput').oninput = checkReady;
+    async function sendMessage() {
+        const text = userInput.value.trim();
+        if (!text && !selectedImageBase64) return;
 
-    function checkReady() {
-        const apiKey = document.getElementById('apiKeyInput').value.trim();
-        if (apiKey && base64Image) {
-            analyzeBtn.disabled = false;
-        } else {
-            analyzeBtn.disabled = true;
+        // 유저 메시지 화면에 추가
+        const userMsgDiv = document.createElement('div');
+        userMsgDiv.className = 'message user';
+        if (selectedImageBase64) {
+            const imgTag = document.createElement('img');
+            imgTag.src = previewThumb.src;
+            userMsgDiv.appendChild(imgTag);
         }
-    }
+        if (text) {
+            const textTag = document.createElement('div');
+            textTag.innerText = text;
+            userMsgDiv.appendChild(textTag);
+        }
+        chatBox.appendChild(userMsgDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
 
-    async function analyzeImage() {
-        const apiKey = document.getElementById('apiKeyInput').value.trim();
-        const resultBox = document.getElementById('resultBox');
-        
-        if (!apiKey || !base64Image) return;
+        const currentImage = selectedImageBase64;
+        const currentMime = selectedMimeType;
 
-        analyzeBtn.disabled = true;
-        analyzeBtn.innerText = "분석 중입니다... 🧐";
-        resultBox.style.display = 'block';
-        resultBox.innerText = "사진의 라벨, 하드웨어, 원단 디테일을 꼼꼼히 분석하는 중입니다. 잠시만 기다려주세요!";
+        // 입력창 초기화
+        userInput.value = '';
+        selectedImageBase64 = null;
+        selectedMimeType = null;
+        previewThumb.style.display = 'none';
+        previewThumb.src = '';
 
-        const promptText = "당신은 세계적인 빈티지 의류 및 밀리터리 기어, 빈티지 시계/안경 전문가입니다. 업로드된 사진을 면밀히 분석해주세요. 다음 항목들을 포함하여 상세히 설명해주세요:\n1. 예상 연식 (또는 제작 시기)\n2. 브랜드, 모델명 또는 출처 (군복, 복각 브랜드 등)\n3. 핵심 디테일 분석 (라벨 폰트, 지퍼 종류(TALON, RAPID 등), 스냅 버튼, 원단 직조감(HBT 등), 스티치 색상 등 근거가 되는 특징)\n4. 기타 흥미로운 빈티지적 가치나 특징";
+        // 로딩 메시지 추가
+        const botMsgDiv = document.createElement('div');
+        botMsgDiv.className = 'message bot';
+        botMsgDiv.innerText = "분석 중입니다... 🧐";
+        chatBox.appendChild(botMsgDiv);
+        chatBox.scrollTop = chatBox.scrollHeight;
 
         try {
-            const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+            const response = await fetch('/api/analyze', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    contents: [{
-                        parts: [
-                            { text: promptText },
-                            {
-                                inline_data: {
-                                    mime_type: mimeType,
-                                    data: base64Image
-                                }
-                            }
-                        ]
-                    }]
+                    prompt: text || "이 빈티지 아이템의 예상 연식과 디테일을 분석해주세요.",
+                    image: currentImage,
+                    mimeType: currentMime
                 })
             });
 
             const data = await response.json();
-            
             if (data.error) {
-                resultBox.innerText = "에러 발생: " + data.error.message;
+                botMsgDiv.innerText = "오류 발생: " + data.error;
             } else {
-                const text = data.candidates[0].content.parts[0].text;
-                resultBox.innerText = text;
+                botMsgDiv.innerText = data.result;
             }
         } catch (err) {
-            resultBox.innerText = "통신 중 오류가 발생했습니다: " + err.message;
-        } finally {
-            analyzeBtn.disabled = false;
-            analyzeBtn.innerText = "연식 및 디테일 분석 시작";
+            botMsgDiv.innerText = "통신 중 오류가 발생했습니다.";
         }
+        chatBox.scrollTop = chatBox.scrollHeight;
     }
 </script>
 
