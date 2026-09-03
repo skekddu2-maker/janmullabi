@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>솔이는 검색쟁이 (Sol is Searcher)</title>
+    <title>검색쟁이 (Multi-Platform Searcher)</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
@@ -97,7 +97,7 @@
 <body>
 
 <div class="container">
-    <h1>🔍 솔이는 검색쟁이 (Sol is Searcher)</h1>
+    <h1>🔍 검색쟁이 (Multi-Platform Searcher)</h1>
     
     <div class="search-box">
         <label style="font-size: 0.9rem; font-weight: bold; display: block; margin-bottom: 6px;">통합 검색어 입력</label>
@@ -111,36 +111,36 @@
     const platformData = {
         "🇰🇷 한국 (Korea)": {
             "🔍 검색엔진": [
-                { name: "네이버 통합검색", url: q => `[https://search.naver.com/search.naver?query=$](https://search.naver.com/search.naver?query=$){encodeURIComponent(q)}`, color: "#059669" },
-                { name: "다음 통합검색", url: q => `[https://search.daum.net/search?w=tot&q=$](https://search.daum.net/search?w=tot&q=$){encodeURIComponent(q)}`, color: "#D97706" }
+                { name: "네이버 통합검색", getUrl: q => "https://search.naver.com/search.naver?query=" + encodeURIComponent(q), color: "#059669" },
+                { name: "다음 통합검색", getUrl: q => "https://search.daum.net/search?w=tot&q=" + encodeURIComponent(q), color: "#D97706" }
             ],
             "🛒 중고 플랫폼": [
-                { name: "번개장터", url: q => `[https://m.bunjang.co.kr/search/products?q=$](https://m.bunjang.co.kr/search/products?q=$){encodeURIComponent(q)}`, color: "#DC2626" },
-                { name: "당근마켓", url: q => `[https://www.daangn.com/search/$](https://www.daangn.com/search/$){encodeURIComponent(q)}`, color: "#FF6F0F" },
-                { name: "후르츠패밀리", url: q => `[https://fruitsfamily.com/search/$](https://fruitsfamily.com/search/$){encodeURIComponent(q)}?sort=RELEVANCE`, color: "#6366F1" }
+                { name: "번개장터", getUrl: q => "https://m.bunjang.co.kr/search/products?q=" + encodeURIComponent(q), color: "#DC2626" },
+                { name: "당근마켓", getUrl: q => "https://www.daangn.com/search/" + encodeURIComponent(q), color: "#FF6F0F" },
+                { name: "후르츠패밀리", getUrl: q => "https://fruitsfamily.com/search/" + encodeURIComponent(q) + "?sort=RELEVANCE", color: "#6366F1" }
             ]
         },
         "🇯🇵 일본 (Japan)": {
             "🔍 검색엔진": [
-                { name: "야후 재팬 (Yahoo!)", url: q => `[https://search.yahoo.co.jp/search?p=$](https://search.yahoo.co.jp/search?p=$){encodeURIComponent(q)}`, color: "#7C3AED" }
+                { name: "야후 재팬 (Yahoo!)", getUrl: q => "https://search.yahoo.co.jp/search?p=" + encodeURIComponent(q), color: "#7C3AED" }
             ],
             "🛒 중고 플랫폼": [
-                { name: "메루카리 (Mercari)", url: q => `[https://jp.mercari.com/search?keyword=$](https://jp.mercari.com/search?keyword=$){encodeURIComponent(q)}`, color: "#E11D48" },
-                { name: "야후 옥션 (Yahoo Auction)", url: q => `[https://auctions.yahoo.co.jp/search/search?p=$](https://auctions.yahoo.co.jp/search/search?p=$){encodeURIComponent(q).replace(/%20/g, '+')}&s1=cb0`, color: "#EA580C" }
+                { name: "메루카리 (Mercari)", getUrl: q => "https://jp.mercari.com/search?keyword=" + encodeURIComponent(q), color: "#E11D48" },
+                { name: "야후 옥션 (Yahoo Auction)", getUrl: q => "https://auctions.yahoo.co.jp/search/search?p=" + encodeURIComponent(q).replace(/%20/g, '+') + "&s1=cb0", color: "#EA580C" }
             ]
         },
         "🇺🇸 미국 및 글로벌 (Global)": {
             "🔍 검색엔진": [
-                { name: "구글 (Google)", url: q => `[https://www.google.com/search?q=$](https://www.google.com/search?q=$){encodeURIComponent(q)}`, color: "#2563EB" }
+                { name: "구글 (Google)", getUrl: q => "https://www.google.com/search?q=" + encodeURIComponent(q), color: "#2563EB" }
             ],
             "🛒 중고 & 빈티지 플랫폼": [
-                { name: "이베이 (eBay)", url: q => `[https://www.ebay.com/sch/i.html?_nkw=$](https://www.ebay.com/sch/i.html?_nkw=$){encodeURIComponent(q).replace(/%20/g, '+')}&_sop=15`, color: "#1D4ED8" },
-                { name: "페이스북 마켓플레이스", url: q => `[https://www.facebook.com/marketplace/search/?query=$](https://www.facebook.com/marketplace/search/?query=$){encodeURIComponent(q)}`, color: "#1E40AF" },
-                { name: "빈티드 (Vinted)", url: q => `[https://www.vinted.fr/catalog?search_text=$](https://www.vinted.fr/catalog?search_text=$){encodeURIComponent(q)}`, color: "#0D9488" },
-                { name: "포시마크 (Poshmark)", url: q => `[https://poshmark.com/search?query=$](https://poshmark.com/search?query=$){encodeURIComponent(q)}`, color: "#BE185D" },
-                { name: "그레일드 (Grailed)", url: q => `[https://www.grailed.com/shop?query=$](https://www.grailed.com/shop?query=$){encodeURIComponent(q)}`, color: "#4B5563" },
-                { name: "디팝 (Depop)", url: q => `[https://www.depop.com/search/?q=$](https://www.depop.com/search/?q=$){encodeURIComponent(q)}`, color: "#EF4444" },
-                { name: "베스티에르 콜렉티브", url: q => `[https://www.vestiairecollective.com/search/?q=$](https://www.vestiairecollective.com/search/?q=$){encodeURIComponent(q)}`, color: "#374151" }
+                { name: "이베이 (eBay)", getUrl: q => "https://www.ebay.com/sch/i.html?_nkw=" + encodeURIComponent(q).replace(/%20/g, '+') + "&_sop=15", color: "#1D4ED8" },
+                { name: "페이스북 마켓플레이스", getUrl: q => "https://www.facebook.com/marketplace/search/?query=" + encodeURIComponent(q), color: "#1E40AF" },
+                { name: "빈티드 (Vinted)", getUrl: q => "https://www.vinted.fr/catalog?search_text=" + encodeURIComponent(q), color: "#0D9488" },
+                { name: "포시마크 (Poshmark)", getUrl: q => "https://poshmark.com/search?query=" + encodeURIComponent(q), color: "#BE185D" },
+                { name: "그레일드 (Grailed)", getUrl: q => "https://www.grailed.com/shop?query=" + encodeURIComponent(q), color: "#4B5563" },
+                { name: "디팝 (Depop)", getUrl: q => "https://www.depop.com/search/?q=" + encodeURIComponent(q), color: "#EF4444" },
+                { name: "베스티에르 콜렉티브", getUrl: q => "https://www.vestiairecollective.com/search/?q=" + encodeURIComponent(q), color: "#374151" }
             ]
         }
     };
@@ -181,7 +181,7 @@
                         alert("검색어를 먼저 입력해주세요!");
                         return;
                     }
-                    window.open(item.url(keyword), '_blank');
+                    window.open(item.getUrl(keyword), '_blank');
                 };
                 content.appendChild(a);
             });
