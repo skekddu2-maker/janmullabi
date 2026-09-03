@@ -1,3 +1,10 @@
+export const config = {
+    api: {
+        bodyParser: {
+            sizeLimit: '10mb', // 대용량 이미지도 거뜬히 받도록 제한 해제
+        },
+    },
+};
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
@@ -24,7 +31,7 @@ export default async function handler(req, res) {
             });
         }
         parts.push({
-            text: (prompt || "이 빈티지 아이템을 분석해주세요.") + "\n\n당신은 세계적인 빈티지 의류 및 밀리터리, 소품 전문가입니다. 라벨, 하드웨어, 원단 등을 바탕으로 예상 연식, 브랜드/출처, 핵심 디테일 근거를 상세히 분석해주세요."
+            text: (prompt || "이 빈티지 아이템을 분석해주세요.") + "\n\n당신은 세계적인 빈티지 의류 및 밀리터리, 소품 전문가입니다. 업로드된 전체 옷의 실루엣, 팟팅/스티치, 원단감, 단추 및 하드웨어 등을 바탕으로 예상 연식, 브랜드/출처, 핵심 디테일 근거를 상세히 분석해주세요."
         });
 
         const response = await fetch(url, {
